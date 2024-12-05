@@ -1,16 +1,52 @@
 #main file to run the sudoku game
 import pygame
-from sudoku_generator import SudokuGenerator
-from sudoku_generator import generate_sudoku
+from sudoku_generator import SudokuGenerator,generate_sudoku
+
 cell_size = 50 #only change this one to make the cells smaller/bigger
 width = cell_size*9
 height = cell_size*9+cell_size
 
-class Cell:
-    pass
+def tempGen():
+    list=[]
+    for i in range(1,82,9):
+        list2 = []
+        while i%9!=0:
+            list2.append(i)
+            i += 1
+        list2.append(i)
+        list.append(list2)
+        return list
 
-class Board: #idk if width/height are in pixels or cells, rn its pixels -matthew
-    def __init__(self, width, height, screen, difficulty="easy"):
+class Cell:
+    def __init__(self, value, row, col, screen):
+        self.value = value
+        self.row = row
+        self.col = col
+        self.screen = screen
+        self.isSelecteed = False
+    
+    def set_cell_value(self, value):
+        pass
+
+    def set_sketched_value(self, value):
+        pass
+
+    def draw(self):
+        pass
+
+class Board: 
+    def __init__(self, width: int, screen, difficulty: str):
+        match difficulty:
+            case "easy":
+                self.list = generate_sudoku(width, 30)
+            case "medium":
+                self.list = generate_sudoku(width, 40)
+            case "hard":
+                self.list = generate_sudoku(width, 50)
+            case "zero":
+                self.list = generate_sudoku(width, 0)
+            case "temp":
+                self.list = tempGen
         self.width = width
         self.height = height
         self.screen = screen
@@ -33,14 +69,43 @@ def main():
     try:
         pygame.init()
         screen = pygame.display.set_mode((width,height)) 
-        board = Board(width, height, screen)
+        board = Board(9, screen, "temp") #temporary call, should be done through the main menu
         #cell definition goes here
         clock = pygame.time.Clock()
+        currentCell = [0,0]
         running = True
         while running:
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
+                match event.type:
+                    case pygame.QUIT:
+                        running = False
+                    case pygame.MOUSEBUTTONDOWN:
+                        clickX = list(event.pos)[0]
+                        clickY = list(event.pos)[1]
+                        cellRow = clickX//cell_size
+                        cellCol = clickY//cell_size
+                        currentCell = [cellRow,cellCol]
+                    #cell navigation using arrow keys, updates currentCell [intX, intY]
+                    case pygame.KEYDOWN:
+                        match event.key:
+                            case pygame.K_RIGHT:
+                                if currentCell[0] < 8:
+                                    currentCell[0] += 1
+                            case pygame.K_LEFT:
+                                if currentCell[0] > 0:
+                                    currentCell[0] -= 1
+                            case pygame.K_UP:
+                                if currentCell[1] > 0:
+                                    currentCell[1] -= 1
+                            case pygame.K_DOWN:
+                                if currentCell[1] < 8:
+                                    currentCell[1] += 1
+                            case pygame.K_f:
+                                print(currentCell)
+                    case _:
+                        continue
+                        
+
             screen.fill("white")
             board.draw()
             pygame.display.flip()

@@ -22,10 +22,10 @@ class SudokuGenerator:
 	Return:
 	None
     '''
-    def __init__(self, row_length, removed_cells): #done, matthew
+    def __init__(self, row_length, removed_cells): #WRONG, matthew
         self.row_length = row_length
         self.removed_cells = removed_cells
-        self.board = generate_sudoku(self.row_length, self.removed_cells)
+        self.board = [[1,2,3],[1,2,3],[1,2,3]]
         self.box_length = math.sqrt(self.row_length)
 
     '''
@@ -44,7 +44,7 @@ class SudokuGenerator:
 	Parameters: None
 	Return: None
     '''
-    def print_board(self): #done, Matthew
+    def print_board(self): #done, matthew
         for row in self.board:
             for col in row:
                 print(col,end=" ")
