@@ -34,7 +34,7 @@ class Cell:
     def draw(self):
         pass
 
-class Board: 
+class Board:
     def __init__(self, width: int, screen, difficulty: str):
         match difficulty:
             case "easy":
@@ -52,18 +52,104 @@ class Board:
         self.screen = screen
         self.difficulty = difficulty
 
-    def draw(self): #ONLY DRAWS LINES RN
-        for i in range(1,width//cell_size+1): #vertical
-            if i%3==0:
-                pygame.draw.line(self.screen, "black", (cell_size*i,0), (cell_size*i,height-cell_size), 3)
-            else:
-                pygame.draw.line(self.screen, "black", (cell_size*i,0), (cell_size*i,height-cell_size))
+        self.selected_cell = None
+        self.original_board = [row[:] for row in self.list]
 
-        for i in range(1,(height-cell_size)//cell_size+1): #horizontal
-            if i%3==0:
-                pygame.draw.line(self.screen, "black", (0,cell_size*i), (width,cell_size*i), 3)
+    def draw(self):  # ONLY DRAWS LINES RN
+        for i in range(1, width // cell_size + 1):  # vertical
+            if i % 3 == 0:
+                pygame.draw.line(self.screen, "black", (cell_size * i, 0), (cell_size * i, height - cell_size), 3)
             else:
-                pygame.draw.line(self.screen, "black", (0,cell_size*i), (width,cell_size*i))
+                pygame.draw.line(self.screen, "black", (cell_size * i, 0), (cell_size * i, height - cell_size))
+
+        for i in range(1, (height - cell_size) // cell_size + 1):  # horizontal
+            if i % 3 == 0:
+                pygame.draw.line(self.screen, "black", (0, cell_size * i), (width, cell_size * i), 3)
+            else:
+                pygame.draw.line(self.screen, "black", (0, cell_size * i), (width, cell_size * i))
+
+    def select(self, row, col):
+        # Marks the cell at(row, col) in the board as the current selected cell. Once a cell has been selected, the user can edit its value or sketched value.
+        self.selected_cell = (row,col)
+
+    def click(self, row, col):
+        # If a tuple of(x, y) coordinates is within the displayed board, this function returns a tuple of the(row, col) of the cell which was clicked. Otherwise, this function returns None.
+        if 0 <= row < self.width and 0<= col < self.height - cell_size:
+            return col//cell_size, row//cell_size
+        return None
+
+    def clear(self):
+        # Clears the value cell. Note that the user can only remove the cell values and sketched values that are filled by themselves.
+        if self.selected_self:
+            row, col = self.selected_cell
+            if self.original_board[row][col] == 0:
+                self.list[row][col] = 0
+
+    def sketch(self, value):
+        # Sets the sketched value of the current selected cell equal to the user entered value. It will be displayed at the top left corner of the cell using the draw() function.
+
+        # NOTE FROM ELIN: not sure if this is correct because it wants the draw function called but i'm not sure how to integrate it
+        if self.selected_cell:
+            row, col = self.selected_cell
+            if self.original_board[row][col] == 0:
+                self.list[row][col] = value
+
+    def place_number(self, value):
+        #Sets the value of the current selected cell equal to the user entered value. Called when the user presses the Enter key.
+        if self.selected_cell:
+            row, col = self.selected_cell
+            if self.original_board[row][col] == 0:
+                self.list[row][col] = value
+        #NOTE FROM ELIN: "called when user presses enter key" would that be here or under a different function for pressing enter??
+
+    def reset_to_original(self):
+        #Resets all cells in the board to their original values (0 if cleared, otherwise the corresponding digit).
+        self.list = [row[:] for row in self.original_board]
+
+    def is_full(self):
+        #Returns a Boolean value indicating whether the board is full or not.
+        return not any(0 in row for row in self.list)
+
+
+    def update_board(self):
+        #Updates the underlying 2D board with the values in all cells.
+        pass
+
+        #NOTE FROM ELIN: is this needed becauyse it should already be updated with the functions above no?
+
+    def find_empty(self):
+        #Finds an empty cell and returns its row and col as a tuple(x, y).
+        for row in range(len(self.list)):
+            for col in range(len(self.list[row])):
+                if self.list[row][col] == 0:
+                    return row, col
+        return None
+        #as a tuple?...
+
+
+    def check_board(self):
+        #Check whether the Sudoku board is solved correctly.
+
+        def is_solved(arr):
+            return sorted([x for x in arr if x!=0]) == list(range(1,10))
+
+        #check rows and cols
+        for i in range(9):
+            if not is_solved(self.list[i]) or not is_solved([self.list[x][i]] for x in range(9)]):
+                return False
+
+        #check 3x3 grids
+        for grid_row in range(0,9,3):
+            for grid_col in range (0,9,3):
+                grid = [
+                    self.list[r][c]
+                    for r in range(box_row, box_row+3)
+                    for c in range(box_col, box_col+3)
+                ]
+                if not is_solved(grid):
+                    return False
+
+        return True
 
 def main():
     try:
