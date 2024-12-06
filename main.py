@@ -6,6 +6,97 @@ cell_size = 50  # only change this one to make the cells smaller/bigger
 width = cell_size * 9
 height = cell_size * 9 + cell_size
 
+WIDTH, HEIGHT = 800, 600
+LINE_COLOR = (255, 255, 255)
+
+# UI functionality is below
+def draw_game_start(screen):  # creates the game start screen
+    # title font
+    start_title_font = pygame.font.Font(None, 100)
+    game_mode_font = pygame.font.Font(None, 75)
+    button_font = pygame.font.Font(None, 50)
+
+    # background color
+    screen.fill("lightblue")
+
+    # title
+    title_surface = start_title_font.render("Sudoku!", 0, ("lightgray"))
+    title_rectangle = title_surface.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 100))
+    screen.blit(title_surface, title_rectangle)
+
+    # game modes
+    game_mode_surface = game_mode_font.render("Select Game Mode:", 0, ("lightgray"))
+    game_mode_rectangle = game_mode_surface.get_rect(center=(WIDTH // 2, HEIGHT // 2))
+    screen.blit(game_mode_surface, game_mode_rectangle)
+
+    # buttons and text
+    easy_text = button_font.render("Easy", 0, ("lightgray"))
+    medium_text = button_font.render("Medium", 0, ("lightgray"))
+    hard_text = button_font.render("Hard", 0, ("lightgray"))
+
+    # text and button background color
+    easy_surface = pygame.Surface((easy_text.get_size()[0] + 20, easy_text.get_size()[1] + 20))
+    easy_surface.fill(LINE_COLOR)
+    easy_surface.blit(easy_text, (10, 10))
+    medium_surface = pygame.Surface((medium_text.get_size()[0] + 20, medium_text.get_size()[1] + 20))
+    medium_surface.fill(LINE_COLOR)
+    medium_surface.blit(medium_text, (10, 10))
+    hard_surface = pygame.Surface((hard_text.get_size()[0] + 20, hard_text.get_size()[1] + 20))
+    hard_surface.fill(LINE_COLOR)
+    hard_surface.blit(hard_text, (10, 10))
+
+    # button rectangle
+    easy_rectangle = easy_surface.get_rect(center=(WIDTH // 2 - 200, HEIGHT // 2 + 100))
+    medium_rectangle = medium_surface.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 100))
+    hard_rectangle = hard_surface.get_rect(center=(WIDTH // 2 + 200, HEIGHT // 2 + 100))
+
+    # buttons
+    screen.blit(easy_surface, easy_rectangle)
+    screen.blit(medium_surface, medium_rectangle)
+    screen.blit(hard_surface, hard_rectangle)
+
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if easy_rectangle.collidepoint(event.pos):
+                    # checks if mouse on easy button
+                    return "easy"  # returns to main if the mouse on start button
+                elif medium_rectangle.collidepoint(event.pos):
+                    # returns to main if the mouse on medium button
+                    return "medium"
+                elif hard_rectangle.collidepoint(event.pos):
+                    return "hard"
+        pygame.display.update()
+
+
+def draw_ingame_options(screen): #creates buttons and text and colors for in game options
+    button_font = pygame.font.Font(None, 50)
+    reset_text = button_font.render("Reset", 0, (255, 255, 255))
+    restart_text = button_font.render("Restart", 0, (255, 255, 255))
+    exit_text = button_font.render("Exit", 0, (255, 255, 255))
+
+    reset_surface = pygame.Surface((reset_text.get_size()[0] + 20, reset_text.get_size()[1] + 20))
+    reset_surface.fill(LINE_COLOR)
+    reset_surface.blit(reset_text, (10, 10))
+    restart_surface = pygame.Surface((restart_text.get_size()[0] + 20, restart_text.get_size()[1] + 20))
+    restart_surface.fill(LINE_COLOR)
+    restart_surface.blit(restart_text, (10, 10))
+    exit_surface = pygame.Surface((exit_text.get_size()[0] + 20, exit_text.get_size()[1] + 20))
+    exit_surface.fill(LINE_COLOR)
+    exit_surface.blit(exit_text, (10, 10))
+
+    reset_rectangle = reset_surface.get_rect(center=(WIDTH // 2 - 200, HEIGHT - 25))
+    restart_rectangle = restart_surface.get_rect(center=(WIDTH // 2, HEIGHT - 25))
+    exit_rectangle = exit_surface.get_rect(center=(WIDTH // 2 + 200, HEIGHT - 25))
+
+    # buttons
+    screen.blit(reset_surface, reset_rectangle)
+    screen.blit(restart_surface, restart_rectangle)
+    screen.blit(exit_surface, exit_rectangle)
+
+    return reset_rectangle, restart_rectangle, exit_rectangle
 
 def tempGen():
     list = []
@@ -227,7 +318,6 @@ class Board:
         return False
 
     def game_over_screen(self):
-        #dimensions
         self.width = min(width, 800)
         self.height = min(height, 600)
 
@@ -235,7 +325,7 @@ class Board:
         self.screen.fill("#0000CD")
         pygame.draw.rect(self.screen, ("#0000CD"), (0, 0, self.width, self.height))
         font = pygame.font.Font(None, 100)
-        text = font.render("GAME OVER", True, ("red"))
+        text = font.render("GAME OVER!", True, ("red"))
         text_rect = text.get_rect(center=(self.width // 2, self.height // 3))
         self.screen.blit(text, text_rect)
 
@@ -250,23 +340,72 @@ class Board:
 
         pygame.display.flip()
 
-        #restart game
         restart = False
         while not restart:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     quit()
+
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     mouseX, mouseY = event.pos
                     if restart_button.collidepoint(mouseX, mouseY):
                         restart = True
+
+        #restart game
+        self.__init__(9, self.screen, "temp")
+
+    def game_is_won(self):
+        if self.check_board():
+            if self.is_full():
+                return True
+        return False
+
+    def draw_game_win(self):
+        self.width = min(width, 800)
+        self.height = min(height, 600)
+
+        # screen
+        self.screen.fill("#0000CD")
+        pygame.draw.rect(self.screen, ("#0000CD"), (0, 0, self.width, self.height))
+        font = pygame.font.Font(None, 100)
+        text = font.render("YOU WIN!!!", True, ("red"))
+        text_rect = text.get_rect(center=(self.width // 2, self.height // 3))
+        self.screen.blit(text, text_rect)
+
+        # button
+        button_color = ("red")  # Green color
+        exit_game_button = pygame.Rect(self.width // 4, self.height // 2, self.width // 2, 50)
+        pygame.draw.rect(self.screen, button_color, exit_game_button)
+        button_font = pygame.font.Font(None, 36)
+        button_text = button_font.render("Exit Game", True, ("white"))
+        button_text_rect = button_text.get_rect(center=exit_game_button.center)
+        self.screen.blit(button_text, button_text_rect)
+
+        pygame.display.flip()
+
+        exit_game = False
+        while not exit_game:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    quit()
+
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    mouseX, mouseY = event.pos
+                    if exit_game_button.collidepoint(mouseX, mouseY):
+                        exit_game = True
+
+        # exit game
         self.__init__(9, self.screen, "temp")
 
 def main():
     try:
         pygame.init()
         screen = pygame.display.set_mode((width, height))
+        draw_game_start(screen)
+        #menu options...what happens with each button click:
+        
         board = Board(9, screen, "temp")  # temporary call, should be done through the main menu
         # cell definition goes here
         clock = pygame.time.Clock()
@@ -313,6 +452,8 @@ def main():
 
             if board.is_game_over():
                 board.game_over_screen()
+            if board.game_is_won():
+                board.draw_game_win()
 
             screen.fill("white")
             board.draw()
