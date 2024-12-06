@@ -65,6 +65,7 @@ class Board:
             else:
                 pygame.draw.line(self.screen, "black", (0,cell_size*i), (width,cell_size*i))
 
+
 def main():
     try:
         pygame.init()
@@ -74,21 +75,24 @@ def main():
         clock = pygame.time.Clock()
         currentCell = [0,0]
         running = True
+        sketchNum = None #used in cell editting
         while running:
             for event in pygame.event.get():
                 match event.type:
                     case pygame.QUIT:
                         running = False
-                    case pygame.MOUSEBUTTONDOWN:
+                    
+                    case pygame.MOUSEBUTTONDOWN: #cell nav by mouse
                         clickX = list(event.pos)[0]
                         clickY = list(event.pos)[1]
                         cellRow = clickX//cell_size
                         cellCol = clickY//cell_size
                         currentCell = [cellRow,cellCol]
-                    #cell navigation using arrow keys, updates currentCell [intX, intY]
+                    
+                    #checks all key user inputes for arrow nav and cell writing
                     case pygame.KEYDOWN:
                         match event.key:
-                            case pygame.K_RIGHT:
+                            case pygame.K_RIGHT: #arrow keys for naviation
                                 if currentCell[0] < 8:
                                     currentCell[0] += 1
                             case pygame.K_LEFT:
@@ -100,11 +104,24 @@ def main():
                             case pygame.K_DOWN:
                                 if currentCell[1] < 8:
                                     currentCell[1] += 1
-                            case pygame.K_f:
-                                print(currentCell)
+
+                            case pygame.K_RETURN: #enter sketch
+                                print(f"submitted {sketchNum} at {currentCell}") #TODO replace with call to board.sketch
+
+                            case pygame.K_BACKSPACE:
+                                pass
+                                #TODO make call to the clear function/whatever wipes the cells sketch/entered number
+
+                            case _: #checks for number inputs to sketch
+                                try:
+                                    sketchNum = int(event.unicode)
+                                    if sketchNum == 0:
+                                        sketchNum = None
+                                    print(f"num pressed: {sketchNum}") #TODO replace with call to board.place_number
+                                except: #not a number
+                                    continue
                     case _:
-                        continue
-                        
+                        continue                       
 
             screen.fill("white")
             board.draw()
