@@ -219,6 +219,49 @@ class Board:
                     return False
 
         return True
+        
+    def is_game_over(self):
+        if not self.check_board():
+            if self.is_full():
+                return True
+        return False
+
+    def game_over_screen(self):
+        #dimensions
+        self.width = min(width, 800)
+        self.height = min(height, 600)
+
+        #screen
+        self.screen.fill("#0000CD")
+        pygame.draw.rect(self.screen, ("#0000CD"), (0, 0, self.width, self.height))
+        font = pygame.font.Font(None, 100)
+        text = font.render("GAME OVER", True, ("red"))
+        text_rect = text.get_rect(center=(self.width // 2, self.height // 3))
+        self.screen.blit(text, text_rect)
+
+        #button
+        button_color = ("red")  # Green color
+        restart_button = pygame.Rect(self.width // 4, self.height // 2, self.width // 2, 50)
+        pygame.draw.rect(self.screen, button_color, restart_button)
+        button_font = pygame.font.Font(None, 36)
+        button_text = button_font.render("Restart Game", True, ("white"))
+        button_text_rect = button_text.get_rect(center=restart_button.center)
+        self.screen.blit(button_text, button_text_rect)
+
+        pygame.display.flip()
+
+        #restart game
+        restart = False
+        while not restart:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    quit()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    mouseX, mouseY = event.pos
+                    if restart_button.collidepoint(mouseX, mouseY):
+                        restart = True
+        self.__init__(9, self.screen, "temp")
 
 def main():
     try:
@@ -267,6 +310,9 @@ def main():
                                 print(currentCell)
                     case _:
                         continue
+
+            if board.is_game_over():
+                board.game_over_screen()
 
             screen.fill("white")
             board.draw()
