@@ -26,6 +26,7 @@ class Cell:
         self.col = col
         self.screen = screen
         self.isSelecteed = False
+        self.sketched_value = 0
 
     def set_cell_value(self, value):
         self.value = value
@@ -34,11 +35,45 @@ class Cell:
         self.sketched_value = value
 
     def draw(self):
-        pass
-        # if self.sketched_value > 0:
+        #draw cell
+        cell = pygame.Rect(self.col * cell_size, self.row * cell_size, cell_size, cell_size)
+        #highlight
+        if self.sketched_value > 0:
+            pygame.draw.rect(self.screen, "yellow", cell)
+        #draw value
+        if self.value:
+            font = pygame.font.Font(None, cell_size//2)
+            text = font.render(str(self.value), True, "black")
+            self.screen.blit(
+                text,
+                (self.col*cell_size+cell_size//4, self.row*cell_size+cell_size//6)
+            )
+        pygame.draw.rect(self.screen, "black", cell, 1)
 
 
 class Board:
+    def __init__(self, width: int, screen, difficulty: str):
+        difficulty_map = {
+            "easy": 30,
+            "medium": 40,
+            "hard": 50,
+        }
+        empty_cells = difficulty_map.get(difficulty, 30)
+
+        self.list = generate_sudoku(9, empty_cells)
+        self.original_board = [row[:] for row in self.list]
+        self.width = width
+        self.height = height
+        self.screen = screen
+        self.selected_cell = None
+
+        self.cells = [
+            [Cell(self.list[row][row], row, col, screen) for col in range (len(self.list[row]))]
+            for row in range(len(self.list))
+        ]
+
+    #old code
+    '''
     def __init__(self, width: int, screen, difficulty: str):
         match difficulty:
             case "easy":
@@ -71,10 +106,35 @@ class Board:
                 pygame.draw.line(self.screen, "black", (0, cell_size * i), (width, cell_size * i), 3)
             else:
                 pygame.draw.line(self.screen, "black", (0, cell_size * i), (width, cell_size * i))
+    '''
+
+    def draw(self):
+        # Draw all cells with their numbers
+        for row in self.cells:
+            for cell in row:
+                cell.draw()
+
+        # Draw grid lines (thicker for 3x3 blocks)
+        for i in range(1, 10):
+            line_thickness = 3 if i % 3 == 0 else 1
+
+            # Vertical lines
+            pygame.draw.line(
+                self.screen, "black", (i * cell_size, 0), (i * cell_size, height - cell_size), line_thickness
+            )
+            # Horizontal lines
+            pygame.draw.line(
+                self.screen, "black", (0, i * cell_size), (width, i * cell_size), line_thickness
+            )
 
     def select(self, row, col):
         # Marks the cell at(row, col) in the board as the current selected cell. Once a cell has been selected, the user can edit its value or sketched value.
-        self.selected_cell = (row,col)
+        if self.selected_cell:
+            previous_row, previous_col = self.selected_cell
+            self.cells[previous_row][previous_col].isSelected = False
+
+        self.selected_cell = (row, col)
+        self.cells[row][col].isSelected = True
 
     def click(self, x, y):
         # If a tuple of(x, y) coordinates is within the displayed board, this function returns a tuple of the(row, col) of the cell which was clicked. Otherwise, this function returns None.
@@ -87,7 +147,7 @@ class Board:
         if self.selected_cell:
             row, col = self.selected_cell
             if self.original_board[row][col] == 0:
-                self.list[row][col] = 0
+                self.list[row][col].set_cell_value(0)
 
     def sketch(self, value):
         # Sets the sketched value of the current selected cell equal to the user entered value. It will be displayed at the top left corner of the cell using the draw() function.
@@ -97,19 +157,21 @@ class Board:
         if self.selected_cell:
             row, col = self.selected_cell
             if self.original_board[row][col] == 0:
-                self.list[row][col] = value
+                self.list[row][col].set_sketched_value(value)
 
     def place_number(self, value):
         #Sets the value of the current selected cell equal to the user entered value. Called when the user presses the Enter key.
         if self.selected_cell:
             row, col = self.selected_cell
             if self.original_board[row][col] == 0:
-                self.list[row][col] = value
+                self.list[row][col].set_cell_value(value)
         #NOTE FROM ELIN: "called when user presses enter key" would that be here or under a different function for pressing enter??
 
     def reset_to_original(self):
         #Resets all cells in the board to their original values (0 if cleared, otherwise the corresponding digit).
-        self.list = [row[:] for row in self.original_board]
+        for row in range(9):
+            for col in range(9):
+                self.cells[row][col].set_cell_value(self.original_board[row][col])
 
     def is_full(self):
         #Returns a Boolean value indicating whether the board is full or not.
@@ -124,9 +186,9 @@ class Board:
 
     def find_empty(self):
         #Finds an empty cell and returns its row and col as a tuple(x, y).
-        for row in range(len(self.list)):
-            for col in range(len(self.list[row])):
-                if self.list[row][col] == 0:
+        for row in range(9):
+            for col in range(9):
+                if self.list[row][col].value == 0:
                     return row, col
         return None
         #as a tuple?...
@@ -140,7 +202,9 @@ class Board:
 
         #check rows and cols
         for i in range(9):
-            if not is_solved(self.list[i]) or not is_solved([self.list[x][i] for x in range(9)]):
+            if not is_solved([cell.value for cell in self.cells[i]]) or not is_solved(
+                [self.cells[row][i].value for row in range(9)]
+            ):
                 return False
 
         #check 3x3 grids
