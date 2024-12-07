@@ -25,7 +25,7 @@ class SudokuGenerator:
     def __init__(self, row_length, removed_cells): #WRONG, matthew
         self.row_length = row_length
         self.removed_cells = removed_cells
-        self.board = [[1,2,3],[1,2,3],[1,2,3]]
+        self.board = [[0,2,3],[4,0,6],[0,8,9]] #temp
         self.box_length = math.sqrt(self.row_length)
 
     '''
@@ -197,9 +197,15 @@ class SudokuGenerator:
 	Return: None
     '''
     def remove_cells(self):
-        pass
         # can maybe be done by randomly selecting an index to set to zero using a for loop N num times,
         # where N is the number of cells to remove, itd have to check the cell != 0
+	for i in range(self.removed_cells):
+            while True:
+                row = random.randint(0, 8)
+                col = random.randint(0, 8)
+                if self.board[row][col] != 0:
+                    self.board[row][col] = 0
+                    break
 
 '''
 DO NOT CHANGE

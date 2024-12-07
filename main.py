@@ -116,7 +116,7 @@ class Cell:
         self.row = row
         self.col = col
         self.screen = screen
-        self.isSelecteed = False
+        self.isSelected = False
         self.sketched_value = 0
 
     def set_cell_value(self, value):
@@ -124,6 +124,12 @@ class Cell:
 
     def set_sketched_value(self, value):
         self.sketched_value = value
+        
+    def get_sketched_value(self):
+        return self.sketched_value
+    
+    def get_cell_value(self):
+        return self.cell_value
 
     def draw(self):
         #draw cell
@@ -151,59 +157,28 @@ class Board:
         }
         empty_cells = difficulty_map.get(difficulty, 30)
 
-        self.list = generate_sudoku(9, empty_cells)
-        self.original_board = [row[:] for row in self.list]
+        self.list = tempGen()
+        #TEMPORRARY
+        self.list[0][1] = 0
+        self.list[0][8] = 0
+        self.list[5][5] = 0
+
+        self.original_board = self.list
         self.width = width
         self.height = height
         self.screen = screen
-        self.selected_cell = None
+        self.currentPos = [0,0]
 
-        self.cells = [
-            [Cell(self.list[row][row], row, col, screen) for col in range (len(self.list[row]))]
-            for row in range(len(self.list))
-        ]
-
-    #old code
-    '''
-    def __init__(self, width: int, screen, difficulty: str):
-        match difficulty:
-            case "easy":
-                self.list = generate_sudoku(width, 30)
-            case "medium":
-                self.list = generate_sudoku(width, 40)
-            case "hard":
-                self.list = generate_sudoku(width, 50)
-            case "zero":
-                self.list = generate_sudoku(width, 0)
-            case "temp":
-                self.list = tempGen()
-        self.width = width
-        self.height = height
-        self.screen = screen
-        self.difficulty = difficulty
-
-        self.selected_cell = None
-        self.original_board = [row[:] for row in self.list]
-
-    def draw(self):  # ONLY DRAWS LINES RN
-        for i in range(1, width // cell_size + 1):  # vertical
-            if i % 3 == 0:
-                pygame.draw.line(self.screen, "black", (cell_size * i, 0), (cell_size * i, height - cell_size), 3)
-            else:
-                pygame.draw.line(self.screen, "black", (cell_size * i, 0), (cell_size * i, height - cell_size))
-
-        for i in range(1, (height - cell_size) // cell_size + 1):  # horizontal
-            if i % 3 == 0:
-                pygame.draw.line(self.screen, "black", (0, cell_size * i), (width, cell_size * i), 3)
-            else:
-                pygame.draw.line(self.screen, "black", (0, cell_size * i), (width, cell_size * i))
-    '''
+        self.cells = [[Cell(self.list[row][col], row, col, self.screen) #constructor
+                       for col in range(len(self.list[0]))] #for every col, 
+                       for row in range(len(self.list))] #for every row
+        self.selected_cell = self.cells[0][0]
 
     def draw(self):
         # Draw all cells with their numbers
-        for row in self.cells:
-            for cell in row:
-                cell.draw()
+        for row in range(len(self.list)):
+            for col in range(len(self.list[0])):
+                self.cells[row][col].draw()
 
         # Draw grid lines (thicker for 3x3 blocks)
         for i in range(1, 10):
@@ -220,12 +195,15 @@ class Board:
 
     def select(self, row, col):
         # Marks the cell at(row, col) in the board as the current selected cell. Once a cell has been selected, the user can edit its value or sketched value.
-        if self.selected_cell:
-            previous_row, previous_col = self.selected_cell
-            self.cells[previous_row][previous_col].isSelected = False
+        '''if self.selected_cell:
+            previous_row = self.selected_cell[0] 
+            previous_col = self.selected_cell[1]'''
+        self.selected_cell.isSelected = False
 
-        self.selected_cell = (row, col)
-        self.cells[row][col].isSelected = True
+        self.selected_cell = self.cells[row][col]
+        print(f"attemted to select {row},{col}")
+        self.currentPos = [row,col]
+        self.selected_cell.isSelected = True
 
     def click(self, x, y):
         # If a tuple of(x, y) coordinates is within the displayed board, this function returns a tuple of the(row, col) of the cell which was clicked. Otherwise, this function returns None.
@@ -233,7 +211,7 @@ class Board:
             return y//cell_size, x//cell_size
         return None
 
-    def clear(self):
+    def clear(self): #TODO
         # Clears the value cell. Note that the user can only remove the cell values and sketched values that are filled by themselves.
         if self.selected_cell:
             row, col = self.selected_cell
@@ -245,18 +223,25 @@ class Board:
 
         # NOTE FROM ELIN: not sure if this is correct because it wants the draw function called but i'm not sure how to integrate it
         #needs cell class written in order to complete
-        if self.selected_cell:
-            row, col = self.selected_cell
-            if self.original_board[row][col] == 0:
-                self.list[row][col].set_sketched_value(value)
+        print(f"called sketch, orginal board at pos is {self.original_board[self.currentPos[0]][self.currentPos[1]]}, currentPos: {self.currentPos}")
+        if self.original_board[self.currentPos[0]][self.currentPos[1]] == 0:
+            self.selected_cell.set_sketched_value(value)
+            print("successful sketch call")
 
-    def place_number(self, value):
+    def place_number(self):
         #Sets the value of the current selected cell equal to the user entered value. Called when the user presses the Enter key.
-        if self.selected_cell:
-            row, col = self.selected_cell
-            if self.original_board[row][col] == 0:
-                self.list[row][col].set_cell_value(value)
-        #NOTE FROM ELIN: "called when user presses enter key" would that be here or under a different function for pressing enter??
+        print("attempting to place")
+        print(f"currentPos: {self.currentPos}")
+        if self.original_board[self.currentPos[0]][self.currentPos[1]] == 0:
+            self.selected_cell.set_cell_value(self.selected_cell.get_sketched_value())
+            print("placed")
+
+
+    def get_cell_value(self):
+        return self.selected_cell.get_cell_value()
+    
+    def get_sketched_value(self):
+        return self.selected_cell.get_sketched_value()
 
     def reset_to_original(self):
         #Resets all cells in the board to their original values (0 if cleared, otherwise the corresponding digit).
@@ -283,7 +268,6 @@ class Board:
                     return row, col
         return None
         #as a tuple?...
-
 
     def check_board(self):
         #Check whether the Sudoku board is solved correctly.
@@ -411,42 +395,61 @@ def main():
         clock = pygame.time.Clock()
         currentCell = [0, 0]
         running = True
+        sketchNum = None #used in cell editting
         while running:
             for event in pygame.event.get():
                 match event.type:
                     case pygame.QUIT:
                         running = False
-                    case pygame.MOUSEBUTTONDOWN:
-                        clickX, clickY = event.pos
-                        selected = board.click(clickX, clickY)
-                        if selected:
-                            currentCell = [selected[0], selected[1]]
-                            board.select(selected[0], selected[1])
-
-                        '''
+                    
+                    case pygame.MOUSEBUTTONDOWN: #cell nav by mouse
                         clickX = list(event.pos)[0]
                         clickY = list(event.pos)[1]
-                        cellRow = clickX // cell_size
-                        cellCol = clickY // cell_size
+                        print(clickX, clickY)
+                        cellCol = clickX // cell_size
+                        cellRow = clickY // cell_size
+                        print(cellRow)
                         currentCell = [cellRow, cellCol]
-                        '''
-                    # cell navigation using arrow keys, updates currentCell [intX, intY]
+                        board.select(cellRow, cellCol) 
+                    
+                    # checks all key user inputes for arrow nav and cell writing
                     case pygame.KEYDOWN:
                         match event.key:
-                            case pygame.K_RIGHT:
+                            case pygame.K_RIGHT: #arrow keys for naviation
                                 if currentCell[0] < 8:
                                     currentCell[0] += 1
+                                    board.select(currentCell[0]+1, currentCell[1])
+                                    print(f"selected {currentCell} with arrow")
                             case pygame.K_LEFT:
                                 if currentCell[0] > 0:
                                     currentCell[0] -= 1
+                                    board.select(currentCell[0]-1, currentCell[1])
                             case pygame.K_UP:
                                 if currentCell[1] > 0:
                                     currentCell[1] -= 1
+                                    board.select(currentCell[0], currentCell[1]-1)
                             case pygame.K_DOWN:
                                 if currentCell[1] < 8:
                                     currentCell[1] += 1
-                            case pygame.K_f:
-                                print(currentCell)
+                                    board.select(currentCell[0], currentCell[1]+1)
+
+                            case pygame.K_RETURN: #enter sketch
+                                board.place_number()
+                                print(f"submitted {board.get_sketched_value()} at {currentCell}") #TODO replace with call to board.place_number
+
+                            case pygame.K_BACKSPACE:
+                                pass
+                                #TODO make call to the clear function/whatever wipes the cells sketch/entered number
+
+                            case _: #checks for number inputs to sketch
+                                try:
+                                    sketchNum = int(event.unicode)
+                                    if sketchNum == 0: #0 is not a number for this
+                                        continue
+                                    board.sketch(sketchNum)
+                                    print(f"sketched {sketchNum} at {currentCell}")
+                                except: #not a number
+                                    continue
                     case _:
                         continue
 
@@ -459,7 +462,6 @@ def main():
             board.draw()
             pygame.display.flip()
             clock.tick(60)
-        generate_sudoku(9, 0)
     finally:
         pygame.quit()
 
