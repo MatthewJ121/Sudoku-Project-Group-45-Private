@@ -25,15 +25,15 @@ class SudokuGenerator:
     def __init__(self, row_length, removed_cells): #WRONG, matthew
         self.row_length = row_length
         self.removed_cells = removed_cells
-        def gen_blank_board():
-            list = []
-            for i in range(1, 82, 9):
-                list2 = []
-                for i in range(9):
-                    list2.append(0)
-                list.append(list2)
-            return list
-        self.board = gen_blank_board()
+        self.board = [[0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                      [0, 0, 0, 0, 0, 0, 0, 0, 0]]
             
         self.box_length = math.sqrt(self.row_length)
 
@@ -110,6 +110,13 @@ class SudokuGenerator:
                 if self.board[int(row_start)][int(col_start)] == num:
                     print("returned False")
                     return False
+        '''for row in range(3):
+            for col in range(3):
+                if self.board[row_start][col_start] == num:
+                    return False
+                col_start += 1
+            row_start += 1
+        return True'''
                     
         print("returned True")
         return True
@@ -150,7 +157,6 @@ class SudokuGenerator:
                         
                         numbers.pop(index)
                         print("current board:")
-                        
                         break
                     
             
