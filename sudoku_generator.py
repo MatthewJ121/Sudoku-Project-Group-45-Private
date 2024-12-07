@@ -132,7 +132,7 @@ class SudokuGenerator:
         for i in range(3):
             for j in range(3):
                 while True:
-                    if valid_in_box(row_start, col_start, number) and number not in used_nums:
+                    if self.valid_in_box(row_start, col_start, number) and number not in used_nums:
                         self.board[row_start][col_start] = number
                         col_start += 1
                         used_nums.append(number)
