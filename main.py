@@ -300,11 +300,102 @@ class Board:
                     return False
 
         return True
+        
+    def is_game_over(self):
+        if not self.check_board():
+            if self.is_full():
+                return True
+        return False
+
+    def game_over_screen(self):
+        self.width = min(width, 800)
+        self.height = min(height, 600)
+
+        #screen
+        self.screen.fill("#0000CD")
+        pygame.draw.rect(self.screen, ("#0000CD"), (0, 0, self.width, self.height))
+        font = pygame.font.Font(None, 100)
+        text = font.render("GAME OVER!", True, ("red"))
+        text_rect = text.get_rect(center=(self.width // 2, self.height // 3))
+        self.screen.blit(text, text_rect)
+
+        #button
+        button_color = ("red")  # Green color
+        restart_button = pygame.Rect(self.width // 4, self.height // 2, self.width // 2, 50)
+        pygame.draw.rect(self.screen, button_color, restart_button)
+        button_font = pygame.font.Font(None, 36)
+        button_text = button_font.render("Restart Game", True, ("white"))
+        button_text_rect = button_text.get_rect(center=restart_button.center)
+        self.screen.blit(button_text, button_text_rect)
+
+        pygame.display.flip()
+
+        restart = False
+        while not restart:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    quit()
+
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    mouseX, mouseY = event.pos
+                    if restart_button.collidepoint(mouseX, mouseY):
+                        restart = True
+
+        #restart game
+        self.__init__(9, self.screen, "temp")
+
+    def game_is_won(self):
+        if self.check_board():
+            if self.is_full():
+                return True
+        return False
+
+    def draw_game_win(self):
+        self.width = min(width, 800)
+        self.height = min(height, 600)
+
+        # screen
+        self.screen.fill("#0000CD")
+        pygame.draw.rect(self.screen, ("#0000CD"), (0, 0, self.width, self.height))
+        font = pygame.font.Font(None, 100)
+        text = font.render("YOU WIN!!!", True, ("red"))
+        text_rect = text.get_rect(center=(self.width // 2, self.height // 3))
+        self.screen.blit(text, text_rect)
+
+        # button
+        button_color = ("red")  # Green color
+        exit_game_button = pygame.Rect(self.width // 4, self.height // 2, self.width // 2, 50)
+        pygame.draw.rect(self.screen, button_color, exit_game_button)
+        button_font = pygame.font.Font(None, 36)
+        button_text = button_font.render("Exit Game", True, ("white"))
+        button_text_rect = button_text.get_rect(center=exit_game_button.center)
+        self.screen.blit(button_text, button_text_rect)
+
+        pygame.display.flip()
+
+        exit_game = False
+        while not exit_game:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    quit()
+
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    mouseX, mouseY = event.pos
+                    if exit_game_button.collidepoint(mouseX, mouseY):
+                        exit_game = True
+
+        # exit game
+        self.__init__(9, self.screen, "temp")
 
 def main():
     try:
         pygame.init()
         screen = pygame.display.set_mode((width, height))
+        draw_game_start(screen)
+        #menu options...what happens with each button click:
+        
         board = Board(9, screen, "temp")  # temporary call, should be done through the main menu
         # cell definition goes here
         clock = pygame.time.Clock()

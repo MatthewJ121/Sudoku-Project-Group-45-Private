@@ -63,8 +63,8 @@ class SudokuGenerator:
     def valid_in_row(self, row, num): #done, matthew
         for item in self.board[row]:
             if item == num:
-                return True
-        return False
+                return False
+        return True
 
     '''
 	Determines if num is contained in the specified column (vertical) of the board
@@ -79,8 +79,8 @@ class SudokuGenerator:
     def valid_in_col(self, col, num): #done, matthew
         for row in range(0,9): #rows 1-8
             if self.board[row][col] == num:
-                return True
-        return False
+                return False
+        return True
 
     '''
 	Determines if num is contained in the 3x3 box specified on the board
@@ -95,7 +95,13 @@ class SudokuGenerator:
 	Return: boolean
     '''
     def valid_in_box(self, row_start, col_start, num):
-        pass
+        for row in range(3):
+            for col in range(3):
+                if self.board[row_start][col_start] == num:
+                    return False
+                col_start += 1
+            row_start += 1
+        return True
     
     '''
     Determines if it is valid to enter num at (row, col) in the board
@@ -208,8 +214,6 @@ class SudokuGenerator:
 	Return: None
     '''
     def remove_cells(self):
-        # can maybe be done by randomly selecting an index to set to zero using a for loop N num times,
-        # where N is the number of cells to remove, itd have to check the cell != 0
         for i in range(self.removed_cells):
             while True:
                 row = random.randint(0, 8)
