@@ -4,7 +4,7 @@ from sudoku_generator import SudokuGenerator, generate_sudoku
 
 cell_size = 60  # only change this one to make the cells smaller/bigger
 width = cell_size * 9
-height = cell_size * 9 + cell_size
+height = cell_size * 9
 
 LINE_COLOR = (255, 255, 255)
 
@@ -19,19 +19,19 @@ def draw_game_start(screen):  # creates the game start screen
     screen.fill("lightblue")
 
     # title
-    title_surface = start_title_font.render("Sudoku!", 0, ("black"))
+    title_surface = start_title_font.render("Sudoku!", True, ("black"))
     title_rectangle = title_surface.get_rect(center=(width // 2, height // 2 - 100))
     screen.blit(title_surface, title_rectangle)
 
     # game modes
-    game_mode_surface = game_mode_font.render("Select Game Mode:", 0, ("black"))
+    game_mode_surface = game_mode_font.render("Select Game Mode:", True, ("black"))
     game_mode_rectangle = game_mode_surface.get_rect(center=(width // 2, height // 2))
     screen.blit(game_mode_surface, game_mode_rectangle)
 
     # buttons and text
-    easy_text = button_font.render("Easy", 0, ("black"))
-    medium_text = button_font.render("Medium", 0, ("black"))
-    hard_text = button_font.render("Hard", 0, ("black"))
+    easy_text = button_font.render("Easy", True, ("black"))
+    medium_text = button_font.render("Medium", True, ("black"))
+    hard_text = button_font.render("Hard", True, ("black"))
 
     # text and button background color
     easy_surface = pygame.Surface((easy_text.get_size()[0] + 20, easy_text.get_size()[1] + 20))
@@ -70,32 +70,38 @@ def draw_game_start(screen):  # creates the game start screen
         pygame.display.update()
 
 def draw_ingame_options(screen): #creates buttons and text and colors for in game options
+    # global since we want while loop later to manipulate them
+    global reset_rectangle, restart_rectangle, exit_rectangle
     button_font = pygame.font.Font(None, 50)
-    reset_text = button_font.render("Reset", 0, (255, 255, 255))
-    restart_text = button_font.render("Restart", 0, (255, 255, 255))
-    exit_text = button_font.render("Exit", 0, (255, 255, 255))
 
+    # Initialize buttons
+    # Initialize text first
+    reset_text = button_font.render("Reset", True, ("black"))
+    restart_text = button_font.render("Restart", True, ("black"))
+    exit_text = button_font.render("Exit", True, ("black"))
+
+    # Initialize button background color and text
     reset_surface = pygame.Surface((reset_text.get_size()[0] + 20, reset_text.get_size()[1] + 20))
-    reset_surface.fill(LINE_COLOR)
+    reset_surface.fill("light blue")
     reset_surface.blit(reset_text, (10, 10))
     restart_surface = pygame.Surface((restart_text.get_size()[0] + 20, restart_text.get_size()[1] + 20))
-    restart_surface.fill(LINE_COLOR)
+    restart_surface.fill("light blue")
     restart_surface.blit(restart_text, (10, 10))
     exit_surface = pygame.Surface((exit_text.get_size()[0] + 20, exit_text.get_size()[1] + 20))
-    exit_surface.fill(LINE_COLOR)
+    exit_surface.fill("light blue")
     exit_surface.blit(exit_text, (10, 10))
 
-    reset_rectangle = reset_surface.get_rect(center=(width // 2 - 200, height - 25))
-    restart_rectangle = restart_surface.get_rect(center=(width // 2, height - 25))
-    exit_rectangle = exit_surface.get_rect(center=(width // 2 + 200, height - 25))
+    # Initialize button rectangle
+    reset_rectangle = reset_surface.get_rect(center=(width // 2 - 200, height + 50))
+    restart_rectangle = restart_surface.get_rect(center=(width // 2, height + 50))
+    exit_rectangle = exit_surface.get_rect(center=(width // 2 + 200, height + 50))
 
-    # buttons
+    # Draw buttons
     screen.blit(reset_surface, reset_rectangle)
     screen.blit(restart_surface, restart_rectangle)
     screen.blit(exit_surface, exit_rectangle)
 
-    return reset_rectangle, restart_rectangle, exit_rectangle
-
+#temporary function used for debugging
 def tempGen():
     list = []
     for i in range(1, 82, 9):
@@ -188,7 +194,7 @@ class Board:
 
             # Vertical lines
             pygame.draw.line(
-                self.screen, line_color, (i * cell_size, 0), (i * cell_size, height - cell_size), line_thickness
+                self.screen, line_color, (i * cell_size, 0), (i * cell_size, height), line_thickness
             )
             # Horizontal lines
             pygame.draw.line(
@@ -386,10 +392,8 @@ class Board:
 def main():
     try:
         pygame.init()
-        screen = pygame.display.set_mode((width, height))
-        
+        screen = pygame.display.set_mode((width, height + cell_size*2))
         board = Board(9, screen, draw_game_start(screen))  #draw_game_start returns difficulty
-        # cell definition goes here
         clock = pygame.time.Clock()
         currentCell = [0, 0]
         running = True
@@ -403,10 +407,18 @@ def main():
                     case pygame.MOUSEBUTTONDOWN: #cell nav by mouse
                         clickX = list(event.pos)[0]
                         clickY = list(event.pos)[1]
-                        cellCol = clickX // cell_size
-                        cellRow = clickY // cell_size
-                        currentCell = [cellRow, cellCol]
-                        board.select(cellRow, cellCol) 
+                        if clickX <= width-cell_size and clickY <= height-cell_size:
+                            cellCol = clickX // cell_size
+                            cellRow = clickY // cell_size
+                            currentCell = [cellRow, cellCol]
+                            board.select(cellRow, cellCol) 
+
+                        if reset_rectangle.collidepoint(event.pos):
+                            board.reset_to_original()
+                        elif restart_rectangle.collidepoint(event.pos):
+                            pass
+                        elif exit_rectangle.collidepoint(event.pos):
+                            sys.exit()
                     
                     # checks all key user inputes for arrow nav and cell writing
                     case pygame.KEYDOWN:
@@ -463,7 +475,8 @@ def main():
 
             screen.fill("whitesmoke")
             board.draw()
-            pygame.display.flip()
+            draw_ingame_options(screen)
+            pygame.display.update()
             clock.tick(60)
     finally:
         pygame.quit()
