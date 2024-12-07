@@ -197,9 +197,7 @@ class SudokuGenerator:
 	Return: None
     '''
     def remove_cells(self):
-        # can maybe be done by randomly selecting an index to set to zero using a for loop N num times,
-        # where N is the number of cells to remove, itd have to check the cell != 0
-	for i in range(self.removed_cells):
+        for i in range(self.removed_cells):
             while True:
                 row = random.randint(0, 8)
                 col = random.randint(0, 8)
