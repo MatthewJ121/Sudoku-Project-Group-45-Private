@@ -162,11 +162,7 @@ class Board:
         }
         empty_cells = difficulty_map.get(difficulty, 30)
 
-        self.list = tempGen()
-        #TEMPORRARY
-        self.list[0][1] = 0
-        self.list[0][8] = 0
-        self.list[5][5] = 0
+        self.list = generate_sudoku(9,empty_cells)
 
         self.original_board = self.list
         self.width = width
@@ -219,10 +215,9 @@ class Board:
 
     def clear(self): #TODO
         # Clears the value cell. Note that the user can only remove the cell values and sketched values that are filled by themselves.
-        if self.selected_cell:
-            row, col = self.selected_cell
-            if self.original_board[row][col] == 0:
-                self.list[row][col].set_cell_value(0)
+        if self.original_board[self.currentPos[0]][self.currentPos[1]] == 0:
+            self.selected_cell.set_cell_value(0)
+            self.selected_cell.set_sketched_value(0)
 
     def sketch(self, value):
         # Sets the sketched value of the current selected cell equal to the user entered value. It will be displayed at the top left corner of the cell using the draw() function.
@@ -242,7 +237,6 @@ class Board:
             self.selected_cell.set_cell_value(self.selected_cell.get_sketched_value())
             print("placed")
 
-
     def get_cell_value(self):
         return self.selected_cell.get_cell_value()
     
@@ -259,7 +253,6 @@ class Board:
         #Returns a Boolean value indicating whether the board is full or not.
         return not any(0 in row for row in self.list)
 
-
     def update_board(self):
         #Updates the underlying 2D board with the values in all cells.
         pass
@@ -267,14 +260,15 @@ class Board:
         #NOTE FROM ELIN: is this needed because it should already be updated with the functions above no?
 
     def find_empty(self):
-        #Finds an empty cell and returns its row and col as a tuple(x, y).
+        #Finds an empty cell and returns its row and col
         for row in range(9):
             for col in range(9):
                 if self.list[row][col].value == 0:
                     return row, col
         return None
-        #as a tuple?...
-
+    
+    #NOTE do we even need find_emppty?
+        
     def check_board(self):
         #Check whether the Sudoku board is solved correctly.
 
@@ -393,10 +387,8 @@ def main():
     try:
         pygame.init()
         screen = pygame.display.set_mode((width, height))
-        draw_game_start(screen)
-        #menu options...what happens with each button click:
         
-        board = Board(9, screen, "temp")  # temporary call, should be done through the main menu
+        board = Board(9, screen, draw_game_start(screen))  #draw_game_start returns difficulty
         # cell definition goes here
         clock = pygame.time.Clock()
         currentCell = [0, 0]
@@ -444,7 +436,8 @@ def main():
                                 print(f"submitted {board.get_sketched_value()} at {currentCell}") #TODO replace with call to board.place_number
 
                             case pygame.K_BACKSPACE:
-                                pass
+                                board.clear()
+                                print(f"attempted to clear at {currentCell}")
                                 #TODO make call to the clear function/whatever wipes the cells sketch/entered number
 
                             case pygame.K_d:
@@ -474,7 +467,6 @@ def main():
             clock.tick(60)
     finally:
         pygame.quit()
-
 
 if __name__ == "__main__":
     main()
