@@ -106,6 +106,7 @@ class SudokuGenerator:
     def valid_in_box(self, row_start, col_start, num):
         for row in range(int(row_start), int(row_start+3)):
             for col in range(int(col_start), int(col_start+3)):
+
                 print(f"checking valid in box at {row_start}, {col_start}")
                 if self.board[int(row_start)][int(col_start)] == num:
                     print("returned False")
@@ -119,6 +120,7 @@ class SudokuGenerator:
         return True'''
                     
         print("returned True")
+
         return True
     
     '''
@@ -152,6 +154,7 @@ class SudokuGenerator:
             for j in range(3):
                 while True:
                     index = random.randint(0,len(numbers)-1)
+
                     if self.valid_in_box(row_start+i, col_start+j, numbers[index]):
                         self.board[row_start+i][col_start+j] = numbers[index]
                         
@@ -160,6 +163,7 @@ class SudokuGenerator:
                         break
                     
             
+
     
     '''
     Fills the three boxes along the main diagonal of the board
