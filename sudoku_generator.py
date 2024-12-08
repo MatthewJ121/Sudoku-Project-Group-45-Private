@@ -146,12 +146,17 @@ class SudokuGenerator:
 
 	Return: None
     '''
-    def fill_box(self, row_start, col_start):
-        numbers = [1,2,3,4,5,6,7,8,9]
-        random.shuffle(numbers)
-        for i in range(3):
-            for j in range(3):
-                self.board[row_start+1][col_start+j] = numbers.pop()
+	def fill_box(self, row_start, col_start):
+            nums = list(range(1, 10))
+	    random.shuffle(nums)
+	
+	    for i in range(3):
+	        for j in range(3):
+	            while nums:
+	                num = nums.pop()
+	                if self.valid_in_box(row_start, col_start, num):
+	                    self.board[row_start + i][col_start + j] = num
+	                    break
         
 	'''    
 	for i in range(3):
