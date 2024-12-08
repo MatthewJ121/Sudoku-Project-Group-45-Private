@@ -106,8 +106,8 @@ class SudokuGenerator:
     def valid_in_box(self, row_start, col_start, num):
         for row in range(int(row_start), int(row_start+3)):
             for col in range(int(col_start), int(col_start+3)):
-
                 print(f"checking valid in box at {row_start}, {col_start}")
+                print(f'checking {row},{col}')
                 if self.board[row][col] == num:
                     print("returned False")
                     return False
@@ -120,7 +120,6 @@ class SudokuGenerator:
         return True'''
                     
         print("returned True")
-
         return True
     
     '''
@@ -134,7 +133,13 @@ class SudokuGenerator:
 	Return: boolean
     '''
     def is_valid(self, row, col, num):
-        if self.valid_in_row(row, num) and self.valid_in_col(col, num) and self.valid_in_box:
+        row_start = row
+        col_start = col
+        while row_start%3 != 0:
+            row_start -= 1
+        while col_start%3 != 0:
+            col_start -= 1
+        if self.valid_in_row(row, num) and self.valid_in_col(col, num) and self.valid_in_box(row_start, col_start, num):
             return True
         return False
 
@@ -157,7 +162,6 @@ class SudokuGenerator:
                     if self.valid_in_box(row_start, col_start, num):
                         self.board[row_start + i][col_start + j] = num
                         numbers.remove(num)
-
                         break
             
 
