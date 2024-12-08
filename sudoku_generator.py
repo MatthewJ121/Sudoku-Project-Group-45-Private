@@ -95,12 +95,13 @@ class SudokuGenerator:
 	Return: boolean
     '''
     def valid_in_box(self, row_start, col_start, num):
-        for row in range(3):
-            for col in range(3):
-                if self.board[row_start][col_start] == num:
+        for row in range(int(row_start), int(row_start+3)):
+            for col in range(int(col_start), int(col_start+3)):
+                print(f"checking index {num} valid in box at {row}, {col}")
+                if self.board[row][col] == num:
+                    print("returned False")
                     return False
-                col_start += 1
-            row_start += 1
+        print("returned true")
         return True
     
     '''
@@ -127,18 +128,18 @@ class SudokuGenerator:
 	Return: None
     '''
     def fill_box(self, row_start, col_start):
-        used_nums = []
-        number = random.randint(1,9)
+        numbers = [1,2,3,4,5,6,7,8,9]
         for i in range(3):
             for j in range(3):
                 while True:
-                    if valid_in_box(row_start, col_start, number) and number not in used_nums:
-                        self.board[row_start][col_start] = number
-                        col_start += 1
-                        used_nums.append(number)
+                    index = random.randint(0,len(numbers)-1)
+                    print(f"checking index {numbers[index]} at row {row_start+i} and col {col_start+j}, row start: {row_start}, col start: {col_start}")
+                    if self.valid_in_box(row_start, col_start, numbers[index]):
+                        self.board[row_start+i][col_start+j] = numbers[index]
+
+                        numbers.pop(index)
+                        print("current board:")
                         break
-                    number = random.randint(1, 9)
-            row_start += 1
     
     '''
     Fills the three boxes along the main diagonal of the board
