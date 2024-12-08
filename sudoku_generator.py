@@ -107,10 +107,11 @@ class SudokuGenerator:
         for row in range(int(row_start), int(row_start+3)):
             for col in range(int(col_start), int(col_start+3)):
 
-                print(f"checking valid in box at {row_start}, {col_start}")
                 if self.board[row][col] == num:
                     print("returned False")
                     return False
+        print("returned true")
+        return True
         '''for row in range(3):
             for col in range(3):
                 if self.board[row_start][col_start] == num:
@@ -153,6 +154,7 @@ class SudokuGenerator:
         random.shuffle(numbers)
         for i in range(3):
             for j in range(3):
+
                 for num in numbers:
                     if self.valid_in_box(row_start, col_start, num):
                         self.board[row_start + i][col_start + j] = num
