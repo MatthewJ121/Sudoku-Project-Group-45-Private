@@ -156,19 +156,6 @@ class SudokuGenerator:
                         self.board[row_start + i][col_start + j] = num
                         numbers.remove(num)
                         break
-        
-	'''    
-	for i in range(3):
-            for j in range(3):
-                while True:
-                    index = random.randint(0,len(numbers)-1)
-                    if self.valid_in_box(row_start+i, col_start+j, numbers[index]):
-                        self.board[row_start+i][col_start+j] = numbers[index]
-                        
-                        numbers.pop(index)
-                        print("current board:")
-                        break
-        '''
             
     
     '''
