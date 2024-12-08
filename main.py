@@ -387,7 +387,7 @@ def main():
     try:
         pygame.init()
         screen = pygame.display.set_mode((width, height + cell_size*2))
-        board = Board(9, screen, "test")  #draw_game_start returns difficulty
+        board = Board(9, screen, draw_game_start(screen))  #draw_game_start returns difficulty
         clock = pygame.time.Clock()
         currentCell = [0, 0]
         running = True
