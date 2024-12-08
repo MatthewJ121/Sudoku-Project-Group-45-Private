@@ -174,8 +174,9 @@ class Board:
             "test": 3
         }
         empty_cells = difficulty_map.get(difficulty, 30)
-
-        self.list = generate_sudoku(9,empty_cells)
+        result = generate_sudoku(9,empty_cells)
+        self.list = result[1]
+        self.preRemoval = result[0]
 
         self.original_board = self.list
         self.width = width
@@ -230,21 +231,13 @@ class Board:
 
     def sketch(self, value):
         # Sets the sketched value of the current selected cell equal to the user entered value. It will be displayed at the top left corner of the cell using the draw() function.
-
-        # NOTE FROM ELIN: not sure if this is correct because it wants the draw function called but i'm not sure how to integrate it
-        #needs cell class written in order to complete
-        print(f"called sketch, orginal board at pos is {self.original_board[self.currentPos[0]][self.currentPos[1]]}, currentPos: {self.currentPos}")
         if self.original_board[self.currentPos[0]][self.currentPos[1]] == 0:
             self.selected_cell.set_sketched_value(value)
-            print("successful sketch call")
 
     def place_number(self):
         #Sets the value of the current selected cell equal to the user entered value. Called when the user presses the Enter key.
-        print("attempting to place")
-        print(f"currentPos: {self.currentPos}")
         if self.original_board[self.currentPos[0]][self.currentPos[1]] == 0:
             self.selected_cell.set_cell_value(self.selected_cell.get_sketched_value())
-            print("placed")
 
     def get_cell_value(self):
         return self.selected_cell.get_cell_value()
@@ -274,7 +267,13 @@ class Board:
     
     def check_board(self):
         #Check whether the Sudoku board is solved correctly.
-        def is_solved(arr):
+        for row in range(9):
+            for col in range(9):
+                if self.cells[row][col].get_cell_value() != self.preRemoval[row][col]:
+                    return False
+        return True
+        
+        '''def is_solved(arr):
             return sorted([x for x in arr if x!=0]) == list(range(1,10))
 
         #check rows and cols
@@ -295,11 +294,10 @@ class Board:
                 if not is_solved(grid):
                     return False
 
-        return True
+        return True'''
         
     def is_game_over(self):
-        if not self.check_board():
-            if self.is_full():
+        if self.is_full():
                 return True
         return False
 
@@ -364,7 +362,7 @@ class Board:
         exit_game_button = pygame.Rect(self.width // 4, self.height // 2, self.width // 2, 50)
         pygame.draw.rect(self.screen, button_color, exit_game_button)
         button_font = pygame.font.Font(None, 36)
-        button_text = button_font.render("Restart Game", True, ("white"))
+        button_text = button_font.render("Exit Game", True, ("white"))
         button_text_rect = button_text.get_rect(center=exit_game_button.center)
         self.screen.blit(button_text, button_text_rect)
 
@@ -442,11 +440,17 @@ def main():
 
                             case pygame.K_RETURN: #enter sketch
                                 board.place_number()
-                                print(f"submitted {board.get_sketched_value()} at {currentCell}")
+                                print("pre removal:")
+                                for row in board.preRemoval:
+                                    print(row)
+                                print("current")
+                                for row in board.cells:
+                                    for col in row:
+                                        print(col.get_cell_value(),end=" ")
+                                    print("") 
 
                             case pygame.K_BACKSPACE:
                                 board.clear()
-                                print(f"attempted to clear at {currentCell}")
 
                             case _: #checks for number inputs to sketch
                                 try:
@@ -454,7 +458,6 @@ def main():
                                     if sketchNum == 0: #0 is not a number for this
                                         continue
                                     board.sketch(sketchNum)
-                                    print(f"sketched {sketchNum} at {currentCell}")
                                 except: #not a number
                                     continue
                     case _:
