@@ -1,4 +1,4 @@
-import math,random
+import math,random,copy
 
 """
 This was adapted from a GeeksforGeeks article "Program for Sudoku Generator" by Aarti_Rathi and Ankur Trisal
@@ -265,16 +265,16 @@ Parameters:
 size is the number of rows/columns of the board (9 for this project)
 removed is the number of cells to clear (set to 0)
 
-Return: list[list] (a 2D Python list to represent the board)
+Return: list[list[list], list[list]] 2 lists, [original, postRemoval]
 '''
 def generate_sudoku(size, removed): #given
+    result = []
     sudoku = SudokuGenerator(size, removed)
     sudoku.fill_values()
-    board = sudoku.get_board()
-    print(f"board prior to cell removal")
-    sudoku.print_board()
+    preRemoval = copy.deepcopy(sudoku.get_board())
+    result.append(preRemoval)
     sudoku.remove_cells()
-    board = sudoku.get_board()
-    
-    return board
+    board = copy.deepcopy(sudoku.get_board())
+    result.append(board)
+    return result
     
