@@ -1,4 +1,4 @@
-import math,random
+import math,random,copy
 
 """
 This was adapted from a GeeksforGeeks article "Program for Sudoku Generator" by Aarti_Rathi and Ankur Trisal
@@ -108,7 +108,7 @@ class SudokuGenerator:
             for col in range(int(col_start), int(col_start+3)):
 
                 print(f"checking valid in box at {row_start}, {col_start}")
-                if self.board[int(row_start)][int(col_start)] == num:
+                if self.board[row][col] == num:
                     print("returned False")
                     return False
         '''for row in range(3):
@@ -149,19 +149,16 @@ class SudokuGenerator:
 	Return: None
     '''
     def fill_box(self, row_start, col_start):
-        numbers = [1,2,3,4,5,6,7,8,9]
+        numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+        random.shuffle(numbers)
         for i in range(3):
             for j in range(3):
-                while True:
-                    index = random.randint(0,len(numbers)-1)
+                for num in numbers:
+                    if self.valid_in_box(row_start, col_start, num):
+                        self.board[row_start + i][col_start + j] = num
+                        numbers.remove(num)
 
-                    if self.valid_in_box(row_start+i, col_start+j, numbers[index]):
-                        self.board[row_start+i][col_start+j] = numbers[index]
-                        
-                        numbers.pop(index)
-                        print("current board:")
                         break
-                    
             
 
     
@@ -269,16 +266,16 @@ Parameters:
 size is the number of rows/columns of the board (9 for this project)
 removed is the number of cells to clear (set to 0)
 
-Return: list[list] (a 2D Python list to represent the board)
+Return: list[list[list], list[list]] 2 lists, [original, postRemoval]
 '''
 def generate_sudoku(size, removed): #given
+    result = []
     sudoku = SudokuGenerator(size, removed)
     sudoku.fill_values()
-    board = sudoku.get_board()
-    print(f"board prior to cell removal")
-    sudoku.print_board()
+    preRemoval = copy.deepcopy(sudoku.get_board())
+    result.append(preRemoval)
     sudoku.remove_cells()
-    board = sudoku.get_board()
-    
-    return board
+    board = copy.deepcopy(sudoku.get_board())
+    result.append(board)
+    return result
     
